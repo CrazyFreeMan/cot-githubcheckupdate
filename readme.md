@@ -44,3 +44,5 @@ githubcheckupdate|CrazyFreeMan|cot-githubcheckupdate|githubcheckupdate
 Учитывайте что при каждом входе в админку плагина - для каждого расширения, которое отслеживается, происходит обращение к GitHub из-за чего может быть "подвисание".
 
 Розробник: Ярослав Романенко (yaroslav.romanenko@gmail.com)
+
+[![Робота розширення](http://img.youtube.com/vi/TmhZkoCrVF0/0.jpg)](https://www.youtube.com/watch?v=TmhZkoCrVF0)
