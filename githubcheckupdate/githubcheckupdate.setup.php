@@ -4,14 +4,14 @@
 Code=githubcheckupdate
 Name=GitHub Check
 Description=Check update for plugin on GitHub
-Version=1.0.0
+Version=1.0b
 Date=2015-04-22
 Author=CrazyFreeMan
-Copyright=&copy; CrazyFreeMan, 2015
+Copyright=&copy; CrazyFreeMan (simple-website.in.ua), 2015
 Notes=
 Auth_guests=R
 Lock_guests=2345A
-Auth_members=RW
+Auth_members=R
 Lock_members=2345
 Requires_modules=
 Requires_plugins=
