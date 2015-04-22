@@ -7,9 +7,12 @@ Hooks=tools
 	require_once cot_incfile('githubcheckupdate', 'plug');
 	$t = new XTemplate(cot_tplfile('githubcheckupdate.admin', 'plug', true));	
 		$githubcheckext = cot_get_list_ext();
+		$i=0;
 		foreach ($githubcheckext as $value) {
 				$t->assign(cot_github_row_tags($value));
+				$t->assign("GH_ODD", cot_build_oddeven($i));
 				$t->parse('MAIN.ROW_PLUG');
+				$i++;
 		}	
 	$t->parse('MAIN');
 	$plugin_body = $t->text('MAIN');
