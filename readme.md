@@ -13,6 +13,8 @@ UA
 
 код_розширення|власник_репозиторія|імя_репозиторія|тека
 
+{На всі основні модулі та розширення в архіві є файл preset - скопіюйте в налаштування GitHub Check}
+
 Приклад:
 githubcheckupdate|CrazyFreeMan|cot-githubcheckupdate|githubcheckupdate
 
@@ -36,6 +38,8 @@ RU
 
 Приимер:
 githubcheckupdate|CrazyFreeMan|cot-githubcheckupdate|githubcheckupdate
+
+{На все основные модули и плагины в архиве есть файл preset - скопируйте в настройки GitHub Check}
 
 Для автоматической поддержки расширениями работы с GitHub Check в конфигурации создайте параметр githubcheck (hidden) заполненную по примеру.
 
