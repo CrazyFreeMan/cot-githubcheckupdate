@@ -1,4 +1,4 @@
-##GitHub Check 1.0b
+##GitHub Check 1.1.0b
 
 UA
 ====

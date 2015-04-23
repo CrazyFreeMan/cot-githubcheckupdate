@@ -5,7 +5,8 @@
  * @return [string]             
  */
 function cot_github_get_remote_setup_file_link($parameters){
-	 return 'https://raw.githubusercontent.com/'.$parameters["author"].'/'.$parameters["reponame"].'/master/'.$parameters["folder"].'/'.$parameters["code"].'.setup.php';
+	$folder = (!empty($parameters["folder"])) ? $parameters["folder"].'/' : '';
+	 return 'https://raw.githubusercontent.com/'.$parameters["author"].'/'.$parameters["reponame"].'/master/'.$folder.$parameters["code"].'.setup.php';
 }
 /**
  * [cot_github_get_download_link  Return link for download master.zip ]
@@ -13,12 +14,10 @@ function cot_github_get_remote_setup_file_link($parameters){
  * @return [string]            
  */
 function cot_github_get_download_link($parameters){
-
 	 $link['download'] = 'https://github.com/'.$parameters["author"].'/'.$parameters["reponame"].'/archive/master.zip';
 	 $link['repository'] = 'https://github.com/'.$parameters["author"].'/'.$parameters["reponame"];
 	return $link;
 }
-
 /**
  * [cot_github_get_ext_for_check Get list of all ext for chech update]
  * @return [array] 
@@ -66,14 +65,14 @@ function cot_github_parse_config_row($row){
  * [cot_github_parse_list_ext Load from config github check]
  * @return [array] 
  */
-function cot_github_parse_list_ext(){
+function cot_github_parse_list_ext(){ 	
 	global $cfg;
 	if(!empty($cfg['plugin']['githubcheckupdate']['github_list_ext'])){	
 		$listext = str_replace("\r\n", "\n", $cfg['plugin']['githubcheckupdate']['github_list_ext']);
 		$listext = explode("\n", $listext);		
 		foreach ($listext as $key => $value)
-		{		
-			$val = cot_github_parse_config_row($value);
+		{				
+			$val = cot_github_parse_config_row($value);			
 			if (count($val) > 1)
 			{
 				$set_array[$val['code']] = array(
@@ -81,7 +80,7 @@ function cot_github_parse_list_ext(){
 					'githubdownlloadurl' =>cot_github_get_download_link($val)
 				);
 			}
-		}
+		}		
 		return $set_array;
 	}
 	return false;
@@ -90,12 +89,21 @@ function cot_github_parse_list_ext(){
  * [cot_get_list_ext Load info from github]
  * @return [array]
  */
-function cot_get_list_ext(){
-	$data = cot_github_get_ext_for_check();
-	foreach ($data as $key => $value) {
-		$tmp_info = cot_infoget($value['githubcheckurl']);		
-		$data[$value['code']]['version_gh'] = (empty($tmp_info['Version'])) ? '-' : $tmp_info['Version'] ;
-		$data[$value['code']]['date_upd'] = $tmp_info['Date'];
+function cot_get_list_ext($update=0){	
+	global $db, $Ls, $L, $cache;
+	$data = $cache->db->get('github_check');
+	if (is_null($data) || $update){	
+		$start_time = cot_get_time();
+		$data = cot_github_get_ext_for_check();
+		foreach ($data as $key => $value) {				
+			$tmp_info = cot_infoget($value['githubcheckurl']);
+			$data[$value['code']]['version_gh'] = (empty($tmp_info['Version'])) ? '-' : $tmp_info['Version'] ;
+			$data[$value['code']]['date_upd'] = $tmp_info['Date'];
+		}
+		$cache->db->store('github_check', $data);
+		$msg = $L['gh_chech_time'].cot_build_friendlynumber(bcsub(cot_get_time(),$start_time,10),array('1' => $Ls['Seconds'],'0.001' => $Ls['Milliseconds']),3);			
+		cot_message($msg);
+		cot_redirect(cot_url('admin', array('m' =>'other','p'=>'githubcheckupdate'),'', true));	 
 	}
 	return $data;
 }
@@ -104,15 +112,24 @@ function cot_get_list_ext(){
  * @param  [array] $param 
  * @return [array]       
  */
-function cot_github_row_tags($param){
+function cot_github_row_tags($param){	
 	global $L;
 	$type = ($param['plug']) ? 'pl' : 'mod' ;
 	$urldown = "<a href='".$param['githubdownlloadurl']['download']."' >".$L['Download']."</a>";
+	$urlajaxupdate = "<a title=".$L['Update'].">".$L['Update']."</a>"; //TODO
 	return array(
 					'GH_ROW_PLUG_CODE' => '<a href='.cot_url('admin', 'm=extensions&a=details&'.$type.'='.$param['code']).' target="_blank">'.$param['title'].'</a>',
-					'GH_ROW_PLUG_REPO' => '<a href='.$param['githubdownlloadurl']['repository'].' target="_blank">'.$L['Open'].'</a>',
+					'GH_ROW_PLUG_REPO' => $param['githubdownlloadurl']['repository'],					
 					'GH_ROW_PLUG_VERSION' => $param['version'],
 					'GH_ROW_PLUG_VERSION_REMOTE' =>  ($param['version_gh'] != '-' && $param['version_gh'] != $param['version']) ? "<span class='label label-warning'>".$param['version_gh']."<span>" : $param['version_gh'],
 					'GH_ROW_PLUG_DOWNLOAD' => $urldown
 				);
+}
+/**
+ * [cot_get_time Help funct]
+ * @return [type]
+ */
+function cot_get_time(){
+	$start_time = explode(' ',microtime()); 
+	return $real_time = $start_time[1].substr($start_time[0],1); 
 }
