@@ -7,10 +7,13 @@ Hooks=tools
 	require_once cot_incfile('githubcheckupdate', 'plug');
 	$t = new XTemplate(cot_tplfile('githubcheckupdate.admin', 'plug', true));		
 		$githubcheckext = cot_get_list_ext(cot_import('update', 'G', 'INT'));
+		$last_update = $githubcheckext['last_update'];
+		unset($githubcheckext['last_update']);
 		$i=0;
 		foreach ($githubcheckext as $value) {
 				$t->assign(cot_github_row_tags($value));
 				$t->assign("GH_ODD", cot_build_oddeven($i));
+				$t->assign("GH_LASTUPDATE", $last_update);
 				$t->parse('MAIN.ROW_PLUG');
 				$i++;
 		}

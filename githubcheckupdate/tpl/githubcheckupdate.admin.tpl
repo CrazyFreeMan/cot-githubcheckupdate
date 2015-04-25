@@ -6,10 +6,13 @@
 	<div class="row">
 		<div class="span12">
 			<div class="row">
-				<div class="span10">
+				<div class="span9" id="infoShow">
 				{FILE "{PHP.cfg.themes_dir}/{PHP.cfg.defaulttheme}/warnings.tpl"}
 				<!-- IF {GH_CHECKTIME} --> <div class="alert alert-info">{PHP.L.gh_chech_time}{GH_CHECKTIME}</div><!-- ENDIF --></div>
-				<div class="span2"><a href="{PHP|cot_url('admin','m=other&p=githubcheckupdate&update=1')}" class="btn btn-info">{PHP.L.Update}</a></div>
+				<div class="span3"><a href="{PHP|cot_url('admin','m=other&p=githubcheckupdate&update=1')}" class="btn btn-info">{PHP.L.Update}</a>
+				<br>
+				{PHP.L.Updated} {GH_LASTUPDATE|cot_date('Y-m-d H:i:s', $this)}
+				</div>
 			</div>
 			<div class="row">
 				<div class="span3">{PHP.L.gh_plugin}</div>
@@ -29,7 +32,10 @@
 				</div>
 				<div class="span1">{GH_ROW_PLUG_VERSION}</div>
 				<div class="span2">{GH_ROW_PLUG_VERSION_REMOTE}</div>
-				<div class="span2">{GH_ROW_PLUG_DOWNLOAD}</div>
+				<div class="span2">
+				{GH_ROW_PLUG_DOWNLOAD}
+				{GH_ROW_PLUG_UPDATE}
+				</div>
 			</div>
 		<!-- END: ROW_PLUG -->
 		</div>

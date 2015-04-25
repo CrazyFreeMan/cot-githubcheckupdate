@@ -22,3 +22,20 @@ $L['gh_new_issue'] = 'Создать задачу';
 $L['gh_list_issue'] = 'Посмотреть задачи';
 $L['gh_check'] = 'Действия';
 $L['gh_chech_time'] = 'Проверка выполненна за ';
+
+/*
+ *  messege 
+ */
+$L['gh_cp_err'] = 'Не удается скопировать файлы расширения';
+$L['gh_path_err'] = 'Неверный путь обновляемого плагина ';
+$L['gh_write_err'] = 'Нет доступа на запись ';
+$L['gh_exists_file_err'] = 'Файл поврежден или отсутствует';
+$L['gh_downl_file_err'] = 'Файл не скачан';
+$L['gh_upd_succ'] = "Расширение обновленно <script>
+		$(function(){
+			setTimeout(function () {
+				location.href='admin.php?m=other&p=githubcheckupdate';
+			}, 3000);
+		});
+	</script>";
+$L['gh_upd_err'] = 'Не удается обновить расширения';

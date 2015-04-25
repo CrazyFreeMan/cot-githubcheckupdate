@@ -1,4 +1,5 @@
 <?php defined('COT_CODE') or die('Wrong URL');
+require_once cot_incfile('githubcheckupdate', 'plug', 'resources');
 /**
  * [cot_github_get_remote_setup_file_link Return link to ext setup file]
  * @param  [array] $parameters 
@@ -33,19 +34,26 @@ function cot_github_get_ext_for_check(){
 				$res[$value['ct_code']]['plug'] = $value['ct_plug'];
 			if($value['ct_plug']){
 					if(isset($cfg['plugin'][$value['ct_code']]['githubcheck'])){
-						$res[$value['ct_code']]['githubcheckurl'] = cot_github_get_remote_setup_file_link(cot_github_parse_config_row($cfg['plugin'][$value['ct_code']]['githubcheck']));
-						$res[$value['ct_code']]['githubdownlloadurl'] = cot_github_get_download_link(cot_github_parse_config_row($cfg['plugin'][$value['ct_code']]['githubcheck']));
+						$tmp = cot_github_parse_config_row($cfg['plugin'][$value['ct_code']]['githubcheck']);
+						$res[$value['ct_code']]['githubcheckurl'] = cot_github_get_remote_setup_file_link($tmp);
+						$res[$value['ct_code']]['githubdownlloadurl'] = cot_github_get_download_link($tmp);
+						$res[$value['ct_code']]['githubfolder']= $tmp['folder'];
+						$res[$value['ct_code']]['githubreponame']= $tmp['reponame'];
 					}	 	   		
 	 	    }else{
 		 	    	if(isset($cfg[$value['ct_code']]['githubcheck'])){
-		 	    		$res[$value['ct_code']]['githubcheckurl']= cot_github_get_remote_setup_file_link(cot_github_parse_config_row($cfg[$value['ct_code']]['githubcheck']));
-		 	    		$res[$value['ct_code']]['githubdownlloadurl'] = cot_github_get_download_link(cot_github_parse_config_row($cfg[$value['ct_code']]['githubcheck']));
+		 	    		$tmp = cot_github_parse_config_row($cfg[$value['ct_code']]['githubcheck']);
+		 	    		$res[$value['ct_code']]['githubcheckurl']= cot_github_get_remote_setup_file_link($tmp);
+		 	    		$res[$value['ct_code']]['githubdownlloadurl'] = cot_github_get_download_link($tmp);
+		 	    		$res[$value['ct_code']]['githubfolder']= $tmp['folder'];
+		 	    		$res[$value['ct_code']]['githubreponame']= $tmp['reponame'];
 		 	    	}	
 	 	    }
 	 	    if(isset($gitgub_list[$value['ct_code']])){ 	   		
 	 	   		$res[$value['ct_code']]['githubcheckurl']= $gitgub_list[$value['ct_code']]['githubcheckurl'];
 	 	    	$res[$value['ct_code']]['githubdownlloadurl']= $gitgub_list[$value['ct_code']]['githubdownlloadurl'];
-	 	
+	 			$res[$value['ct_code']]['githubfolder']= $gitgub_list[$value['ct_code']]['githubfolder'];
+	 			$res[$value['ct_code']]['githubreponame']= $gitgub_list[$value['ct_code']]['githubreponame'];
 	 	    }else if(empty($res[$value['ct_code']]['githubcheckurl'])){
 	 	    	unset($res[$value['ct_code']]);
 	 	    } 	 	    
@@ -77,7 +85,9 @@ function cot_github_parse_list_ext(){
 			{
 				$set_array[$val['code']] = array(
 					'githubcheckurl' =>cot_github_get_remote_setup_file_link($val),
-					'githubdownlloadurl' =>cot_github_get_download_link($val)
+					'githubdownlloadurl' =>cot_github_get_download_link($val),
+					'githubfolder' => $val['folder'],
+					'githubreponame' => $val['reponame']
 				);
 			}
 		}		
@@ -90,7 +100,7 @@ function cot_github_parse_list_ext(){
  * @return [array]
  */
 function cot_get_list_ext($update=0){	
-	global $db, $Ls, $L, $cache;
+	global $db, $Ls, $L, $cache, $sys;
 	$data = $cache->db->get('github_check');
 	if (is_null($data) || $update){	
 		$start_time = cot_get_time();
@@ -100,6 +110,7 @@ function cot_get_list_ext($update=0){
 			$data[$value['code']]['version_gh'] = (empty($tmp_info['Version'])) ? '-' : $tmp_info['Version'] ;
 			$data[$value['code']]['date_upd'] = $tmp_info['Date'];
 		}
+		$data['last_update'] = (int)$sys['now'];
 		$cache->db->store('github_check', $data);
 		$msg = $L['gh_chech_time'].cot_build_friendlynumber(bcsub(cot_get_time(),$start_time,10),array('1' => $Ls['Seconds'],'0.001' => $Ls['Milliseconds']),3);			
 		cot_message($msg);
@@ -115,14 +126,15 @@ function cot_get_list_ext($update=0){
 function cot_github_row_tags($param){	
 	global $L;
 	$type = ($param['plug']) ? 'pl' : 'mod' ;
-	$urldown = "<a href='".$param['githubdownlloadurl']['download']."' >".$L['Download']."</a>";
-	$urlajaxupdate = "<a title=".$L['Update'].">".$L['Update']."</a>"; //TODO
+	$urldown = "<a href='".$param['githubdownlloadurl']['download']."' class='btn btn-default' title='".$L['Download']."'><span class='icon-download-alt'></span></a>";
+	$urlajaxupdate = "<a  href='".cot_url('index', 'r=githubcheckupdate&extupd='.$param[code])."' title=".$L['Update']." class='btn btn-default ajax' rel='get-infoShow' title='".$L['Update']."'><span class='icon-refresh'></span></a>"; //TODO
 	return array(
-					'GH_ROW_PLUG_CODE' => '<a href='.cot_url('admin', 'm=extensions&a=details&'.$type.'='.$param['code']).' target="_blank">'.$param['title'].'</a>',
+					'GH_ROW_PLUG_CODE' => '<a href='.cot_url('admin', 'm=extensions&a=details&'.$type.'='.$param['code']).' target="_blank">'.$param['title'].'</a></span>',
 					'GH_ROW_PLUG_REPO' => $param['githubdownlloadurl']['repository'],					
 					'GH_ROW_PLUG_VERSION' => $param['version'],
 					'GH_ROW_PLUG_VERSION_REMOTE' =>  ($param['version_gh'] != '-' && $param['version_gh'] != $param['version']) ? "<span class='label label-warning'>".$param['version_gh']."<span>" : $param['version_gh'],
-					'GH_ROW_PLUG_DOWNLOAD' => $urldown
+					'GH_ROW_PLUG_DOWNLOAD' => $urldown,
+					'GH_ROW_PLUG_UPDATE' =>  ($param['version_gh'] != '-' && $param['version_gh'] != $param['version']) ? $urlajaxupdate : ''
 				);
 }
 /**
@@ -133,3 +145,67 @@ function cot_get_time(){
 	$start_time = explode(' ',microtime()); 
 	return $real_time = $start_time[1].substr($start_time[0],1); 
 }
+/**
+ * [cot_github_scandir Help funct]
+ * @return [type]
+ */
+function cot_github_scandir($dir)
+{
+    $list = scandir($dir);
+    unset($list[0],$list[1]);
+    return array_values($list);
+}
+/**
+ * [cot_github_clear_dir Help funct]
+ * @return [type]
+ */
+function cot_github_clear_dir($dir)
+{
+    $list = cot_github_scandir($dir);    
+    foreach ($list as $file)
+    {
+        if (is_dir($dir.$file))
+        {
+            cot_github_clear_dir($dir.$file.'/');
+            rmdir($dir.$file);
+        }
+        else
+        {
+            unlink($dir.$file);
+        }
+    }
+}
+/**
+ * [cot_github_backup Backup plugin before update]
+ * @param  [type] $source      [plugin dir]
+ * @param  [type] $destination [backup to]
+ * @return [type]              [description]
+ */
+function cot_github_backup($source, $destination) {
+      if (extension_loaded('zip')) {
+          if (file_exists($source)) {
+              $zip = new ZipArchive();
+              if ($zip->open($destination, ZIPARCHIVE::CREATE)) {
+                  $source = realpath($source);
+                  if (is_dir($source)) {
+                      $iterator = new RecursiveDirectoryIterator($source);
+                      // skip dot files while iterating 
+                      $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+                      $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
+                      foreach ($files as $file) {
+                          $file = realpath($file);
+                          if (is_dir($file)) {
+                              $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+                          } else if (is_file($file)) {
+                              $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                          }
+                      }
+                  } else if (is_file($source)) {
+                      $zip->addFromString(basename($source), file_get_contents($source));
+                  }
+              }
+              return $zip->close();
+          }
+      }
+      return false;
+  }
