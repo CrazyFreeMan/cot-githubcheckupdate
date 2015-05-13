@@ -101,8 +101,8 @@ function cot_github_parse_list_ext(){
  */
 function cot_get_list_ext($update=0){	
 	global $db, $Ls, $L, $cache, $sys;
-	$data = $cache->db->get('github_check');
-	if (is_null($data) || $update){	
+	$data = ($cache) ? $cache->db->get('github_check') : '' ;
+	if (is_null($data) || empty($data) || $update){	
 		$start_time = cot_get_time();
 		$data = cot_github_get_ext_for_check();
 		foreach ($data as $key => $value) {				
@@ -111,10 +111,13 @@ function cot_get_list_ext($update=0){
 			$data[$value['code']]['date_upd'] = $tmp_info['Date'];
 		}
 		$data['last_update'] = (int)$sys['now'];
-		$cache->db->store('github_check', $data);
 		$msg = $L['gh_chech_time'].cot_build_friendlynumber(bcsub(cot_get_time(),$start_time,10),array('1' => $Ls['Seconds'],'0.001' => $Ls['Milliseconds']),3);			
 		cot_message($msg);
-		cot_redirect(cot_url('admin', array('m' =>'other','p'=>'githubcheckupdate'),'', true));	 
+		if($cache) {
+			$cache->db->store('github_check', $data);
+			cot_redirect(cot_url('admin', array('m' =>'other','p'=>'githubcheckupdate'),'', true));
+		}
+			 
 	}
 	return $data;
 }
